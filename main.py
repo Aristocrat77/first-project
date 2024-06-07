@@ -3,6 +3,11 @@ import telebot
 from time import sleep
 from datetime import datetime
 from telebot import types
+import sqlite3
+
+
+connect = sqlite3.connect('database.db')
+cursor = connect.cursor()
 
 bot = telebot.TeleBot('6881456125:AAGoHSFy41zOugswPzuhp8J7gUX1XwTm9-w')
 
@@ -29,6 +34,11 @@ def start_handler(message):
     bot.send_message(message.chat.id, '<b> Здравствуйте, это бот магазина рыболовных удилищ. </b>  \n',
                      reply_markup=markup, parse_mode='html')
 
+
+#with sqlite3.connect('db/database.db') as db:
+ #   cursor = db.cursor()
+  #  query = """CREATE TABLE IF NOT EXISTS goods (id INTEGER, brand TEXT, description TEXT, photo BLOB) """
+   # cursor.execute(query)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call, self=None):
@@ -77,8 +87,7 @@ def callback_inline(call, self=None):
         markup.row(btn7, btn6)
         markup.add(btn1, btn4)
         bot.send_message(chat_id=call.message.chat.id,
-                              text="Тут должны быть описание удилища"
-                                   " характеристики и цена",
+                              text="Тут должны быть описание удилища, характеристики и цена",
                               reply_markup=markup, parse_mode='html')
 
     elif call.data == 'Spinning':
