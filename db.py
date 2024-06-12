@@ -1,5 +1,5 @@
-import sqlite3 as sq
-def db_start():
+import sqlite3
+def connect():
+    conn = sqlite3.connect('db/database.db')
+    cursor = conn.cursor()
 
-    db = sq.connect('database.db')
-    cursor

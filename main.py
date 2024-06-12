@@ -4,10 +4,8 @@ from time import sleep
 from datetime import datetime
 from telebot import types
 import sqlite3
+from db import connect
 
-
-connect = sqlite3.connect('database.db')
-cursor = connect.cursor()
 
 bot = telebot.TeleBot('6881456125:AAGoHSFy41zOugswPzuhp8J7gUX1XwTm9-w')
 
@@ -75,10 +73,16 @@ def callback_inline(call, self=None):
                               text="Выберите виды удилищ:",
                               reply_markup=markup, parse_mode='html')
 
+
     elif call.data == 'Feeder':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         file = open('photo/feeder_1.jfif', 'rb')
         bot.send_photo(call.message.chat.id, file)
+        with sqlite3.connect('db/database.db') as db:
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM Float_rods_db')
+            message = cursor.fetchone()[0]
+            print(message)
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
         btn7 = types.InlineKeyboardButton("⬅️Назад", callback_data='back')
@@ -87,8 +91,8 @@ def callback_inline(call, self=None):
         markup.row(btn7, btn6)
         markup.add(btn1, btn4)
         bot.send_message(chat_id=call.message.chat.id,
-                              text="Тут должны быть описание удилища, характеристики и цена",
-                              reply_markup=markup, parse_mode='html')
+                         text="Тут должны быть описание удилища, характеристики и цена",
+                         reply_markup=markup, parse_mode='html')
 
     elif call.data == 'Spinning':
         bot.delete_message(call.message.chat.id, call.message.message_id)
