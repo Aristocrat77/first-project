@@ -1,4 +1,5 @@
 # telegram-bot
+import re
 import telebot
 from time import sleep
 from datetime import datetime
@@ -123,6 +124,61 @@ def callback_inline(call, self=None):
         bot.send_message(chat_id=call.message.chat.id,
                          text="Тут должны быть описание удилища, характеристики и цена",
                          reply_markup=markup, parse_mode='html')
+
+    elif call.data == 'buy':
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
+        send = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                              text="Введите номер телефона",
+                              reply_markup=None, parse_mode='html')
+
+        bot.register_next_step_handler(send, check_phone_number)
+
+
+# Проверка номера телефона
+def check_phone_number(message: dict): # TODO: Разобрать построчно что тут написано, до каждого символа
+    if message.content_type != "text":
+        msg_back_or_repeat('back_to_main_page', 'buy', 'Похоже, Вы прислали не текст😕', message)
+        return
+
+    phone_num = message.text.lower()
+
+    result_phone_num = ''
+
+    for char in phone_num:
+        if char.isdigit():
+            result_phone_num += char
+
+    if not result_phone_num:
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
+        btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
+        markup.add(btn1, btn2)
+        bot.send_message(message.chat.id, "Номер телефона должен содержать только цифры", reply_markup=markup)
+
+        return
+
+    if not re.fullmatch(r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$', result_phone_num):
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
+        btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
+        markup.add(btn1, btn2)
+        bot.send_message(message.chat.id, f"Неправильный формат номера телефона", reply_markup=markup)
+
+        return
+
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    btn1 = types.InlineKeyboardButton('Оплатить💳', callback_data='pay')
+    markup.add(btn1)
+    bot.send_message(message.chat.id, f"Готово, теперь вы можете оплатить билет", reply_markup=markup)
+
+
+# Функция отправки сообщения с ошибкой ввода пользователя и кнопками назад / повторить
+def msg_back_or_repeat(bt1: str, bt2: str, msg: str, message: dict) -> None:
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    btn1 = types.InlineKeyboardButton('◀️ Назад', callback_data=f'{bt1}')
+    btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data=f'{bt2}')
+    markup.add(btn1, btn2)
+    bot.send_message(message.chat.id, f'{msg}', reply_markup=markup)  #TODO: edit_message  переделать
 
 
 if __name__ == '__main__':
