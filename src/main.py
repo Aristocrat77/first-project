@@ -150,35 +150,33 @@ def callback_inline(call, self=None):
 
 
 # Проверка номера телефона
-def check_phone_number(message: dict): # TODO: Разобрать построчно что тут написано, до каждого символа
-    if message.content_type != "text": # если типо сообщения не текст
+def check_phone_number(message: dict):
+    if message.content_type != "text":
         msg_back_or_repeat('back_to_main_page', 'buy', 'Похоже, Вы прислали не текст😕', message)
-        return # то возвращает вывод кнопок и сообщение о том что вы прислали не текст
+        return 
 
-    phone_num = message.text.lower() # переменная в которой лежит текст юзера с методом lower() (возвращает строку в нижнем регистре)
+    phone_num = message.text.lower()
 
-    result_phone_num = '' # результат введенного номера
+    result_phone_num = ''
 
-    for char in phone_num: # переменная char проходит циклом по введеному номеру юзера
-        if char.isdigit(): # проверка введенного номера, если это цифры
+    for char in phone_num:
+        if char.isdigit():
             result_phone_num += char
 
-    if not result_phone_num: # если введенный номер не состоит только из цифр, то выыодятся кнопки с сообщение
-        markup = types.InlineKeyboardMarkup(row_width=2) # переменная в которой две кнопки друг с другм
-        btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page') # название кнопок
-        btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy') # название кнопок
-        markup.add(btn1, btn2) # добавление в переменную markup кнопок
+    if not result_phone_num:
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
+        btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
+        markup.add(btn1, btn2)
         bot.send_message(message.chat.id, "Номер телефона должен содержать только цифры", reply_markup=markup)
-        # бот выводит сообщеник
         return
 
-    if not re.fullmatch(r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$', result_phone_num): # регулярное вырожение, проверка номера телефона
+    if not re.fullmatch(r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$', result_phone_num):
         markup = types.InlineKeyboardMarkup(row_width=2)
         btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
         btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
         markup.add(btn1, btn2)
         bot.send_message(message.chat.id, f"Неправильный формат номера телефона", reply_markup=markup)
-
         return
 
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -188,7 +186,7 @@ def check_phone_number(message: dict): # TODO: Разобрать построч
 
 
 # Функция отправки сообщения с ошибкой ввода пользователя и кнопками назад / повторить
-def msg_back_or_repeat(bt1: str, bt2: str, msg: str, message: dict) -> None: # функция где лежат названия кнопок со строковыми значениями
+def msg_back_or_repeat(bt1: str, bt2: str, msg: str, message: dict) -> None:
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn1 = types.InlineKeyboardButton('◀️ Назад', callback_data=f'{bt1}')
     btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data=f'{bt2}')
