@@ -24,11 +24,25 @@ def init():
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
+    connect = sqlite3.connect('database.db')
+    cursor = connect.cursor()
+    cursor.execute(""" CREATE TABLE IF NOT EXISTS login_id(
+    id INTEGER
+    )""")
+    connect.commit()
+    people_id = message.chat.id
+    cursor.execute(f"SELECT id FROM login_id WHERE id = {people_id}")
+    data = cursor.fetchone()
+    if data is None:
+        user_id = [message.chat.id]
+        cursor.execute("INSERT INTO login_id VALUES(?);", user_id)
+        connect.commit()
     file = open('photo/main_photo.jpg', 'rb')
     bot.send_photo(message.chat.id, file)
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton("🎣Магазин", callback_data="shop")
-    markup.add(btn1)
+    btn2 = types.InlineKeyboardButton("🗑Корзина", callback_data="basket")
+    markup.add(btn1, btn2)
     bot.send_message(message.chat.id, '<b> Здравствуйте, это бот магазина рыболовных удилищ. </b>  \n',
                      reply_markup=markup, parse_mode='html')
 
@@ -53,11 +67,13 @@ def callback_inline(call, self=None):
                               reply_markup=markup, parse_mode='html')
 
     elif call.data == 'back_to_main_page':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
         file = open('photo/main_photo.jpg', 'rb')
         bot.send_photo(call.message.chat.id, file)
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn1 = types.InlineKeyboardButton("🎣Магазин", callback_data="shop")
-        markup.add(btn1)
+        btn2 = types.InlineKeyboardButton("🗑Корзина", callback_data="basket")
+        markup.add(btn1, btn2)
         bot.send_message(call.message.chat.id, '<b> Здравствуйте, это бот магазина рыболовных удилищ. </b>  \n',
                          reply_markup=markup, parse_mode='html')
 
@@ -73,25 +89,24 @@ def callback_inline(call, self=None):
                               text="Выберите виды удилищ:",
                               reply_markup=markup, parse_mode='html')
 
-
     elif call.data == 'Feeder':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         file = open('photo/feeder_1.jfif', 'rb')
         bot.send_photo(call.message.chat.id, file)
         with sqlite3.connect('db/database.db') as db:
             cursor = db.cursor()
-            cursor.execute('SELECT * FROM Float_rods_db')
-            message = cursor.fetchone()[0]
-            print(message)
+            cursor.execute('SELECT brand, description FROM feeder_db')
+            message = cursor.fetchone()
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
         btn7 = types.InlineKeyboardButton("⬅️Назад", callback_data='back')
-        btn1 = types.InlineKeyboardButton("💲Купить", callback_data='buy')
+        btn1 = types.InlineKeyboardButton("🗑Добавить в корзину", callback_data='buy')
         btn4 = types.InlineKeyboardButton("↪️Назад в главное меню", callback_data='back1')
         markup.row(btn7, btn6)
         markup.add(btn1, btn4)
         bot.send_message(chat_id=call.message.chat.id,
-                         text="Тут должны быть описание удилища, характеристики и цена",
+                         text=f"Название: {message[0]} \n"
+                              f"Описание: {message[1]}",
                          reply_markup=markup, parse_mode='html')
 
     elif call.data == 'Spinning':
@@ -101,7 +116,7 @@ def callback_inline(call, self=None):
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
         btn7 = types.InlineKeyboardButton("⬅️Назад", callback_data='back')
-        btn1 = types.InlineKeyboardButton("💲Купить", callback_data='buy')
+        btn1 = types.InlineKeyboardButton("🗑Добавить в корзину", callback_data='buy')
         btn4 = types.InlineKeyboardButton("↪️Назад в главное меню", callback_data='back1')
         markup.row(btn7, btn6)
         markup.add(btn1, btn4)
@@ -116,7 +131,7 @@ def callback_inline(call, self=None):
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
         btn7 = types.InlineKeyboardButton("⬅️Назад", callback_data='back')
-        btn1 = types.InlineKeyboardButton("💲Купить", callback_data='buy')
+        btn1 = types.InlineKeyboardButton("🗑Добавить в корзину", callback_data='buy')
         btn4 = types.InlineKeyboardButton("↪️Назад в главное меню", callback_data='back1')
         markup.row(btn7, btn6)
         markup.add(btn1, btn4)
