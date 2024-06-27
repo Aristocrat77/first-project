@@ -148,6 +148,14 @@ def callback_inline(call, self=None):
 
         bot.register_next_step_handler(send, check_phone_number)
 
+    elif call.data == 'mail':
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
+        send = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                     text="Введите mail",
+                                     reply_markup=None, parse_mode='html')
+
+        bot.register_next_step_handler(send, check_mail)
+
 
 # Проверка номера телефона
 def check_phone_number(message: dict):
@@ -201,6 +209,7 @@ def check_mail(message: dict) -> None:
         return
 
     mail = message.text.lower()
+    print(mail)
 
     if not mail:
         markup = types.InlineKeyboardMarkup(row_width=2)
@@ -217,6 +226,10 @@ def check_mail(message: dict) -> None:
         markup.add(btn1, btn2)
         bot.send_message(message.chat.id, f"Неправильный формат mail", reply_markup=markup)
 
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    btn1 = types.InlineKeyboardButton('Оплатить💳', callback_data='pay')
+    markup.add(btn1)
+    bot.send_message(message.chat.id, f"Готово, теперь вы можете оплатить билет", reply_markup=markup)
 
 
 if __name__ == '__main__':
