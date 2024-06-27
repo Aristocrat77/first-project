@@ -25,7 +25,7 @@ def init():
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
-    connect = sqlite3.connect('database.db')
+    connect = sqlite3.connect('../db/database.db')
     cursor = connect.cursor()
     cursor.execute(""" CREATE TABLE IF NOT EXISTS login_id(
     id INTEGER
@@ -38,7 +38,7 @@ def start_handler(message):
         user_id = [message.chat.id]
         cursor.execute("INSERT INTO login_id VALUES(?);", user_id)
         connect.commit()
-    file = open('photo/main_photo.jpg', 'rb')
+    file = open('../photo/main_photo.jpg', 'rb')
     bot.send_photo(message.chat.id, file)
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn1 = types.InlineKeyboardButton("🎣Магазин", callback_data="shop")
@@ -69,7 +69,7 @@ def callback_inline(call, self=None):
 
     elif call.data == 'back_to_main_page':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        file = open('photo/main_photo.jpg', 'rb')
+        file = open('../photo/main_photo.jpg', 'rb')
         bot.send_photo(call.message.chat.id, file)
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn1 = types.InlineKeyboardButton("🎣Магазин", callback_data="shop")
@@ -92,9 +92,9 @@ def callback_inline(call, self=None):
 
     elif call.data == 'Feeder':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        file = open('photo/feeder_1.jfif', 'rb')
+        file = open('../photo/feeder_1.jfif', 'rb')
         bot.send_photo(call.message.chat.id, file)
-        with sqlite3.connect('db/database.db') as db:
+        with sqlite3.connect('../db/database.db') as db:
             cursor = db.cursor()
             cursor.execute('SELECT brand, description FROM feeder_db')
             message = cursor.fetchone()
@@ -112,7 +112,7 @@ def callback_inline(call, self=None):
 
     elif call.data == 'Spinning':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        file = open('photo/Spinning_1.webp', 'rb')
+        file = open('../photo/Spinning_1.webp', 'rb')
         bot.send_photo(call.message.chat.id, file)
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
@@ -127,7 +127,7 @@ def callback_inline(call, self=None):
 
     elif call.data == 'Float_rods':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        file = open('photo/Float_rods_1.webp', 'rb')
+        file = open('../photo/Float_rods_1.webp', 'rb')
         bot.send_photo(call.message.chat.id, file)
         markup = types.InlineKeyboardMarkup(row_width=1)
         btn6 = types.InlineKeyboardButton("Далее➡️", callback_data='Further')
@@ -179,13 +179,11 @@ def check_phone_number(message: dict):
         bot.send_message(message.chat.id, f"Неправильный формат номера телефона", reply_markup=markup)
         return
 
-    bot.send_message(message.chat.id, f"Готово, теперь введите свой mail")
-
-
-def check_mail_user(message: dict):
-    if message.content_type != "text": # если тип сообщения не текст
-        msg_back_or_repeat(f'back_to_main_page', 'buy', 'Похоже, Вы прислали не текст😕', message)
-        return
+    if bot.send_message:
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        btn1 = types.InlineKeyboardButton('Ввести mail', callback_data='mail')
+        markup.add(btn1)
+        bot.send_message(message.chat.id, f"Готово, теперь введите свой mail", reply_markup=markup)
 
 
 # Функция отправки сообщения с ошибкой ввода пользователя и кнопками назад / повторить
@@ -194,7 +192,7 @@ def msg_back_or_repeat(bt1: str, bt2: str, msg: str, message: dict) -> None:
     btn1 = types.InlineKeyboardButton('◀️ Назад', callback_data=f'{bt1}')
     btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data=f'{bt2}')
     markup.add(btn1, btn2)
-    bot.edit_message_text(message.chat.id, f'{msg}', reply_markup=markup)  #TODO: edit_message  переделать
+    bot.edit_message_text(message.chat.id, f'{msg}', reply_markup=markup)
 
 
 def check_mail(message: dict) -> None:
@@ -209,7 +207,7 @@ def check_mail(message: dict) -> None:
         btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
         btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
         markup.add(btn1, btn2)
-        bot.send_message(message.chat.id, "Номер телефона должен содержать только, буквы", reply_markup=markup)
+        bot.send_message(message.chat.id, "mail должен содержать только, буквы", reply_markup=markup)
         return
 
     if not re.fullmatch(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+', mail):
@@ -217,7 +215,8 @@ def check_mail(message: dict) -> None:
         btn1 = types.InlineKeyboardButton('Главное меню', callback_data='back_to_main_page')
         btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
         markup.add(btn1, btn2)
-        bot.send_message(message.chat.id, f"Неправильный формат номера телефона", reply_markup=markup)
+        bot.send_message(message.chat.id, f"Неправильный формат mail", reply_markup=markup)
+
 
 
 if __name__ == '__main__':
