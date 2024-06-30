@@ -187,11 +187,10 @@ def check_phone_number(message: dict):
         bot.send_message(message.chat.id, f"Неправильный формат номера телефона", reply_markup=markup)
         return
 
-    if bot.send_message:
-        markup = types.InlineKeyboardMarkup(row_width=2)
-        btn1 = types.InlineKeyboardButton('Ввести mail', callback_data='mail')
-        markup.add(btn1)
-        bot.send_message(message.chat.id, f"Готово, теперь введите свой mail", reply_markup=markup)
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    btn1 = types.InlineKeyboardButton('Ввести mail', callback_data='mail')
+    markup.add(btn1)
+    bot.send_message(message.chat.id, f"Готово, теперь введите свой mail", reply_markup=markup)
 
 
 # Функция отправки сообщения с ошибкой ввода пользователя и кнопками назад / повторить
@@ -225,6 +224,7 @@ def check_mail(message: dict) -> None:
         btn2 = types.InlineKeyboardButton('Повторить ввод', callback_data='buy')
         markup.add(btn1, btn2)
         bot.send_message(message.chat.id, f"Неправильный формат mail", reply_markup=markup)
+        return
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     btn1 = types.InlineKeyboardButton('Оплатить💳', callback_data='pay')
