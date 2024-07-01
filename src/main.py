@@ -5,7 +5,6 @@ from time import sleep
 from datetime import datetime
 from telebot import types
 import sqlite3
-from db import connect
 
 
 bot = telebot.TeleBot('6881456125:AAGoHSFy41zOugswPzuhp8J7gUX1XwTm9-w')
@@ -23,21 +22,20 @@ def init():
         init()
 
 
+def connect():
+    connect_db = sqlite3.connect('../db/database.db')
+    cursor = connect_db.cursor()
+
+
 @bot.message_handler(commands=['start'])
 def start_handler(message):
-    connect = sqlite3.connect('../db/database.db')
-    cursor = connect.cursor()
-    cursor.execute(""" CREATE TABLE IF NOT EXISTS login_id(
-    id INTEGER
-    )""")
-    connect.commit()
-    people_id = message.chat.id
-    cursor.execute(f"SELECT id FROM login_id WHERE id = {people_id}")
-    data = cursor.fetchone()
-    if data is None:
-        user_id = [message.chat.id]
-        cursor.execute("INSERT INTO login_id VALUES(?);", user_id)
-        connect.commit()
+    connect_db = sqlite3.connect('../db/database.db')
+    cursor = connect_db.cursor()
+    cursor.execute(" CREATE TABLE IF NOT EXISTS accounts("
+                   "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                   "tg_id INTEGER, "
+                   "cart_id TEXT)")
+    connect_db.commit()
     file = open('../photo/main_photo.jpg', 'rb')
     bot.send_photo(message.chat.id, file)
     markup = types.InlineKeyboardMarkup(row_width=1)
@@ -48,10 +46,14 @@ def start_handler(message):
                      reply_markup=markup, parse_mode='html')
 
 
-#with sqlite3.connect('db/database.db') as db:
- #   cursor = db.cursor()
-  #  query = """CREATE TABLE IF NOT EXISTS goods (id INTEGER, brand TEXT, description TEXT, photo BLOB) """
-   # cursor.execute(query)
+def cmd_start_db(user_id):
+    connect_db = sqlite3.connect('../db/database.db')
+    cursor = connect_db.cursor()
+    user = cursor.execute("SELECT * FROM accounts WHERE tg_id == {key}".format(key=user_id)).fetchone()
+    if not user:
+        cursor.execute("INSERT INTO accounts (tg_id) VALUES {key}".format(key=user_id))
+        connect_db.commit()
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call, self=None):
