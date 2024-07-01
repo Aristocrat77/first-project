@@ -36,6 +36,11 @@ def start_handler(message):
                    "tg_id INTEGER, "
                    "cart_id TEXT)")
     connect_db.commit()
+    people_id = message.chat.id
+    user = cursor.execute("SELECT * FROM accounts WHERE tg_id == {key}".format(key=people_id)).fetchone()
+    if not user:
+        cursor.execute("INSERT INTO accounts (tg_id) VALUES ({key})".format(key=people_id))
+        connect_db.commit()
     file = open('../photo/main_photo.jpg', 'rb')
     bot.send_photo(message.chat.id, file)
     markup = types.InlineKeyboardMarkup(row_width=1)
@@ -44,15 +49,6 @@ def start_handler(message):
     markup.add(btn1, btn2)
     bot.send_message(message.chat.id, '<b> Здравствуйте, это бот магазина рыболовных удилищ. </b>  \n',
                      reply_markup=markup, parse_mode='html')
-
-
-def cmd_start_db(user_id):
-    connect_db = sqlite3.connect('../db/database.db')
-    cursor = connect_db.cursor()
-    user = cursor.execute("SELECT * FROM accounts WHERE tg_id == {key}".format(key=user_id)).fetchone()
-    if not user:
-        cursor.execute("INSERT INTO accounts (tg_id) VALUES {key}".format(key=user_id))
-        connect_db.commit()
 
 
 @bot.callback_query_handler(func=lambda call: True)
