@@ -5,6 +5,8 @@ from time import sleep
 from datetime import datetime
 from telebot import types
 import sqlite3
+import random
+import string
 
 
 bot = telebot.TeleBot('6881456125:AAGoHSFy41zOugswPzuhp8J7gUX1XwTm9-w')
@@ -20,6 +22,16 @@ def init():
         print('Bot status: STOP', datetime.now())
         sleep(2)
         init()
+
+
+
+
+def random_number():
+    return ''.join(random.sample(string.hexdigits, k=8))
+
+
+jopa = random_number()
+print(jopa)
 
 
 def connect():
